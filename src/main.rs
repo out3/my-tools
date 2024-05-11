@@ -9,8 +9,6 @@ mod addons {
 
 use addons::hello_world::HelloWorldAddon;
 
-
-
 /// Function to call the right addon depending on first argument
 fn call_addon(args: Vec<String>) -> Result<CommandStringResult, MyToolsError> {
     // Get the addon to run
@@ -51,12 +49,15 @@ fn main() {
     // Test arguments length
     if args.len() < 2 {
         print_usage();
-        return;
+        std::process::exit(1); // Exit with error code 1, not enough arguments
     }
 
     // Call the right addon
     match call_addon(args) {
         Ok(res) => println!("{}", res),
-        Err(e) => eprintln!("{}", e)
+        Err(e) => {
+            eprintln!("{}", e);
+            std::process::exit(1); // Exit with error code 1, addon not found
+        }
     }
 }

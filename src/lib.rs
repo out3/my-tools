@@ -30,7 +30,7 @@ Commands:
     fn call_help(args: &Vec<&str>) {
         if args.len() == 1 && (args[0] == "--help" || args[0] == "-h") {
             eprintln!("{}", Self::get_help());
-            std::process::exit(0);
+            std::process::exit(0); // Exit with success
         }
     }
 
