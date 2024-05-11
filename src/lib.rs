@@ -10,7 +10,32 @@ pub trait MyToolsAddonCommand {
 }
 
 /// Trait designed to be implemented by every addons
-pub trait MyToolsAddon { 
+pub trait MyToolsAddon {
+    /// Function to get the help message of the addon
+    fn get_help() -> String {
+        format!(r#"
+=== Addon: {keyword} ===
+
+Usage: {keyword} <COMMAND>
+
+Commands:
+  {commands}
+"#,
+        keyword = Self::get_keyword(),
+        commands = Self::list_commands().join("\n  ")
+        )
+    }
+
+    /// Function to display the help message if the arguments contains "--help" or "-h" 
+    fn call_help(args: &Vec<&str>) {
+        if args.len() == 1 && (args[0] == "--help" || args[0] == "-h") {
+            eprintln!("{}", Self::get_help());
+            std::process::exit(0);
+        }
+    }
+
+    // Functions to implement
+
     /// Function to get the keyword that should be use by the user to call the addon
     fn get_keyword() -> &'static str;
 

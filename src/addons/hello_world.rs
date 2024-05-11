@@ -12,7 +12,7 @@ impl MyToolsAddonCommand for HelloWorldCommand {
     }
 }
 
-/// Command to print "Hello, {name}!"
+/// Command to print "Hello, <name>!"
 struct HelloInputCommand {
     name: String,
 }
@@ -28,26 +28,32 @@ impl MyToolsAddonCommand for HelloInputCommand {
 pub struct HelloWorldAddon; 
 
 impl MyToolsAddon for HelloWorldAddon {
+    /// Get the keyword of the addon
     fn get_keyword() -> &'static str {
-        "test"
+        "hello"
     }
 
+    /// Parse the arguments and return the corresponding command
     fn parse(args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError> {
         // Convert &[String] to &[&str]
         let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+
+        // Get the help message if args correspond to "--help" or "-h"
+        Self::call_help(&args);
 
         // Parse the arguments and return the corresponding command
         match args[..] {
             [] => Ok(Box::new(HelloWorldCommand {})),
             [name] => Ok(Box::new(HelloInputCommand { name: name.to_string() })),
-            _ => Err(MyToolsError::InvalidCommand(format!("{}", args.join(" "))))
+            _ => Err(MyToolsError::InvalidCommand(format!("Invalid command : {}\n", args.join(" "))))
         }
     }    
 
+    /// List the commands of the addon
     fn list_commands() -> Vec<String> {
         vec![
-            ".. hello : Print \"Hello, world!\"".to_string(),
-            ".. hello {name} : \"Hello, {name}!\"".to_string(),
+            format!("'my_tools {}' : Print \"Hello, world!\"", Self::get_keyword()),
+            format!("'my_tools {} <name>' : Print \"Hello, <name>!\"", Self::get_keyword()),
         ]
     }
 }
@@ -55,7 +61,7 @@ impl MyToolsAddon for HelloWorldAddon {
 #[test]
 fn get_keyword() {
     let keywork = HelloWorldAddon::get_keyword();
-    assert!(keywork == "test");
+    assert!(keywork == "hello");
 }
 
 // HelloWorldAddon::parse tests
