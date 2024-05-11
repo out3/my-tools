@@ -51,9 +51,16 @@ impl MyToolsAddon for HelloWorldAddon {
 
     /// List the commands of the addon
     fn list_commands(&self) -> Vec<String> {
+        let width = 30;
         vec![
-            format!("'my_tools {}' : Print \"Hello, world!\"", self.get_keyword()),
-            format!("'my_tools {} <name>' : Print \"Hello, <name>!\"", self.get_keyword()),
+            format!(
+                "{: <width$}Print \"Hello, world!\"",
+                format!("'my_tools {}'", self.get_keyword()),
+            ),
+            format!(
+                "{: <width$}Print \"Hello, <name>!\"", 
+                format!("'my_tools {} <name>'", self.get_keyword()),
+            ),
         ]
     }
 }
