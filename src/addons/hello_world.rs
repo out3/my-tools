@@ -25,21 +25,21 @@ impl MyToolsAddonCommand for HelloInputCommand {
 
 
 /// HelloWorldAddon structure
-pub struct HelloWorldAddon; 
+pub struct HelloWorldAddon;
 
 impl MyToolsAddon for HelloWorldAddon {
     /// Get the keyword of the addon
-    fn get_keyword() -> &'static str {
+    fn get_keyword(&self) -> &'static str {
         "hello"
     }
 
     /// Parse the arguments and return the corresponding command
-    fn parse(args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError> {
+    fn parse(&self, args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError> {
         // Convert &[String] to &[&str]
         let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
 
         // Get the help message if args correspond to "--help" or "-h"
-        Self::call_help(&args);
+        self.call_help(&args);
 
         // Parse the arguments and return the corresponding command
         match args[..] {
@@ -50,18 +50,18 @@ impl MyToolsAddon for HelloWorldAddon {
     }    
 
     /// List the commands of the addon
-    fn list_commands() -> Vec<String> {
+    fn list_commands(&self) -> Vec<String> {
         vec![
-            format!("'my_tools {}' : Print \"Hello, world!\"", Self::get_keyword()),
-            format!("'my_tools {} <name>' : Print \"Hello, <name>!\"", Self::get_keyword()),
+            format!("'my_tools {}' : Print \"Hello, world!\"", self.get_keyword()),
+            format!("'my_tools {} <name>' : Print \"Hello, <name>!\"", self.get_keyword()),
         ]
     }
 }
 
 #[test]
 fn get_keyword() {
-    let keywork = HelloWorldAddon::get_keyword();
-    assert!(keywork == "hello");
+    let keyword = HelloWorldAddon.get_keyword();
+    assert_eq!(keyword, "hello");
 }
 
 // HelloWorldAddon::parse tests
@@ -69,7 +69,7 @@ fn get_keyword() {
 #[test]
 fn command_hello() {
     let args = vec![];
-    let cmd = HelloWorldAddon::parse(&args).expect("Failed to parse command");
+    let cmd = HelloWorldAddon.parse(&args).expect("Failed to parse command");
     assert_eq!(cmd.execute().unwrap(), String::from("Hello, world!"));
 }
 
@@ -77,7 +77,7 @@ fn command_hello() {
 #[test]
 fn command_hello_input() {
     let args = vec!["world123".to_string()];
-    let cmd = HelloWorldAddon::parse(&args).expect("Failed to parse command");
+    let cmd = HelloWorldAddon.parse(&args).expect("Failed to parse command");
     assert_eq!(cmd.execute().unwrap(), String::from("Hello, world123!"));
 }
 
@@ -85,8 +85,6 @@ fn command_hello_input() {
 #[test]
 fn parse_over_args() {
     let args = vec!["world".to_string(), "test".to_string()];
-    let cmd = HelloWorldAddon::parse(&args);
+    let cmd = HelloWorldAddon.parse(&args);
     assert!(cmd.is_err());
 }
-
-

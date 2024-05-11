@@ -12,7 +12,7 @@ pub trait MyToolsAddonCommand {
 /// Trait designed to be implemented by every addons
 pub trait MyToolsAddon {
     /// Function to get the help message of the addon
-    fn get_help() -> String {
+    fn get_help(&self) -> String {
         format!(r#"
 === Addon: {keyword} ===
 
@@ -21,33 +21,33 @@ Usage: {keyword} <COMMAND>
 Commands:
   {commands}
 "#,
-        keyword = Self::get_keyword(),
-        commands = Self::list_commands().join("\n  ")
+                keyword = self.get_keyword(),
+                commands = self.list_commands().join("\n  ")
         )
     }
 
     /// Function to display the help message if the arguments contains "--help" or "-h" 
-    fn call_help(args: &Vec<&str>) {
+    fn call_help(&self, args: &Vec<&str>) {
         if args.len() == 1 && (args[0] == "--help" || args[0] == "-h") {
-            eprintln!("{}", Self::get_help());
+            eprintln!("{}", self.get_help());
             std::process::exit(0); // Exit with success
         }
     }
 
     // Functions to implement
 
-    /// Function to get the keyword that should be use by the user to call the addon
-    fn get_keyword() -> &'static str;
+    /// Function to get the keyword that should be used by the user to call the addon
+    fn get_keyword(&self) -> &'static str;
 
     /// Function to parse the arguments and return a MyToolsAddonCommand
-    fn parse(args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError>;
+    fn parse(&self, args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError>;
 
     /// Function to list every commands available
-    fn list_commands() -> Vec<String>;
+    fn list_commands(&self) -> Vec<String>;
 }
 
 /// Error type for the addon
-#[derive( Debug)]
+#[derive(Debug)]
 pub enum MyToolsError { 
     /// Error when the addon is not recognized
     AddonNotFound(String),
@@ -69,4 +69,3 @@ impl fmt::Display for MyToolsError {
 }
 
 impl error::Error for MyToolsError {}
-
