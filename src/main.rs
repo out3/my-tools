@@ -13,6 +13,14 @@ mod addons {
 // Step 2 : Import the addon
 use addons::hello_world::HelloWorldAddon;
 
+/// Function to get the list of enabled addons
+fn get_enabled_addons() ->  Vec<Box<dyn MyToolsAddon>> {
+    // Step 3 : Add the addon to the list of enabled addons
+    vec! [
+        Box::new(HelloWorldAddon)
+    ]
+}
+
 /// Function to call the right addon depending on first argument
 fn call_addon(args: Vec<String>, addons: &Vec<Box<dyn MyToolsAddon>>) -> Result<CommandStringResult, MyToolsError> {
     // Get the addon to run
@@ -60,11 +68,8 @@ fn check_keyword_uniqueness(addons: &Vec<Box<dyn MyToolsAddon>>) {
 
 /// Main function
 fn main() {
-    // Step 3 : Add the addon to the list of enabled addons
     // List of addons
-    let enabled_addons: Vec<Box<dyn MyToolsAddon>> = vec![
-        Box::new(HelloWorldAddon),
-    ];
+    let enabled_addons: Vec<Box<dyn MyToolsAddon>> = get_enabled_addons();
 
     // Check if keywords are unique
     check_keyword_uniqueness(&enabled_addons);

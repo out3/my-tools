@@ -10,6 +10,14 @@ impl MyToolsAddonCommand for HelloWorldCommand {
     fn execute(&self) -> Result<CommandStringResult, MyToolsError> {
         Ok("Hello, world!".to_string())
     }
+
+    fn get_command_input(&self) -> String {
+        "".to_string()
+    }
+
+    fn get_command_help(&self) -> String {
+        "Print \"Hello, world!\"".to_string()
+    }
 }
 
 /// Command to print "Hello, <name>!"
@@ -20,6 +28,14 @@ struct HelloInputCommand {
 impl MyToolsAddonCommand for HelloInputCommand {
     fn execute(&self) -> Result<CommandStringResult, MyToolsError> {
         Ok(format!("Hello, {}!", self.name))
+    }
+
+    fn get_command_input(&self) -> String {
+        "<name>".to_string()
+    }
+
+    fn get_command_help(&self) -> String {
+        "Print \"Hello, <name>!\"".to_string()
     }
 }
 
@@ -36,7 +52,10 @@ impl MyToolsAddon for HelloWorldAddon {
     /// Parse the arguments and return the corresponding command
     fn parse(&self, args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError> {
         // Convert &[String] to &[&str]
-        let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+        let args: Vec<&str> = args
+            .iter()
+            .map(|s| s.as_str())
+            .collect();
 
         // Get the help message if args correspond to "--help" or "-h"
         self.call_help(&args);
@@ -47,20 +66,13 @@ impl MyToolsAddon for HelloWorldAddon {
             [name] => Ok(Box::new(HelloInputCommand { name: name.to_string() })),
             _ => Err(MyToolsError::InvalidCommand(format!("Invalid command : {}\n", args.join(" "))))
         }
-    }    
+    }
 
-    /// List the commands of the addon
-    fn list_commands(&self) -> Vec<String> {
-        let width = 30;
+    /// Get the list of commands
+    fn get_list_commands(&self) -> Vec<Box<dyn MyToolsAddonCommand>> {
         vec![
-            format!(
-                "{: <width$}Print \"Hello, world!\"",
-                format!("'my_tools {}'", self.get_keyword()),
-            ),
-            format!(
-                "{: <width$}Print \"Hello, <name>!\"", 
-                format!("'my_tools {} <name>'", self.get_keyword()),
-            ),
+            Box::new(HelloWorldCommand {}),
+            Box::new(HelloInputCommand {name: String::new()})
         ]
     }
 }

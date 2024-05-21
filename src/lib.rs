@@ -7,12 +7,43 @@ pub type CommandStringResult = String;
 pub trait MyToolsAddonCommand {
     /// Function to execute the command
     fn execute(&self) -> Result<CommandStringResult, MyToolsError>;
+
+    /// Function to get the input of the command
+    fn get_command_input(&self) -> String;
+
+    /// Function to get the help message of the command
+    fn get_command_help(&self) -> String;
 }
 
 /// Trait designed to be implemented by every addons
 pub trait MyToolsAddon {
     /// Function to get the help message of the addon
     fn get_help(&self) -> String {
+        // Get addon's keyword
+        let keyword = self.get_keyword();
+
+        // Get the list of commands
+        let commands = self.get_list_commands();
+
+        // Generate the width of the space separator based on maximum command input length and keyword length
+        let width_separator =
+            "my_tools".len() // Tool name length
+            + keyword.len() // Addon's keyword length
+            + commands.iter().map(|cmd| cmd.get_command_input().len()).max().unwrap_or(0) // Max
+        // command input length
+            + 9;
+
+        // Get the commands input and help message
+        let commands: Vec<String> = commands.iter().map(|cmd| {
+            format!(
+                "{: <width_separator$}{}",
+                format!("'my_tools {} {}'", keyword, cmd.get_command_input()),
+                cmd.get_command_help(),
+                width_separator = width_separator,
+            )
+        }).collect::<Vec<String>>();
+
+        // Generate the help message
         format!(r#"
 === Addon: {keyword} ===
 
@@ -21,12 +52,12 @@ Usage: {keyword} <COMMAND>
 Commands:
   {commands}
 "#,
-                keyword = self.get_keyword(),
-                commands = self.list_commands().join("\n  ")
+                keyword = keyword,
+                commands = commands.join("\n  ")
         )
     }
 
-    /// Function to display the help message if the arguments contains "--help" or "-h" 
+    /// Function to display the help message if the arguments contains "--help" or "-h"
     fn call_help(&self, args: &Vec<&str>) {
         if args.len() == 1 && (args[0] == "--help" || args[0] == "-h") {
             eprintln!("{}", self.get_help());
@@ -39,16 +70,17 @@ Commands:
     /// Function to get the keyword that should be used by the user to call the addon
     fn get_keyword(&self) -> &'static str;
 
+    /// Function to list every commands available
+    fn get_list_commands(&self) -> Vec<Box<dyn MyToolsAddonCommand>>;
+
     /// Function to parse the arguments and return a MyToolsAddonCommand
     fn parse(&self, args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError>;
 
-    /// Function to list every commands available
-    fn list_commands(&self) -> Vec<String>;
 }
 
 /// Error type for the addon
 #[derive(Debug)]
-pub enum MyToolsError { 
+pub enum MyToolsError {
     /// Error when the addon is not recognized
     AddonNotFound(String),
     /// Error when the command is not well formatted
