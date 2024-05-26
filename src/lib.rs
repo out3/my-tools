@@ -1,18 +1,27 @@
 use std::{error, fmt};
 
 /// Type for the result of a command
-pub type CommandStringResult = String;
+pub type CommandResult = String;
+/// Type for the input messages of a command
+pub type CommandInputs = Vec<String>;
+/// Type for the help message of a command
+pub type CommandHelp = String;
+/// Struct to group command inputs and help message
+pub struct CommandInputsHelp {
+    pub inputs_msg: CommandInputs,
+    pub help_msg: CommandHelp
+}
 
 /// Trait designed to be implemented by every addon commands
 pub trait MyToolsAddonCommand {
     /// Function to execute the command
-    fn execute(&self) -> Result<CommandStringResult, MyToolsError>;
+    fn execute(&self) -> Result<CommandResult, MyToolsError>;
 
     /// Function to get the input of the command
-    fn get_command_input(&self) -> String;
+    fn get_command_input() -> CommandInputs where Self: Sized;
 
     /// Function to get the help message of the command
-    fn get_command_help(&self) -> String;
+    fn get_command_help() -> CommandHelp where Self: Sized;
 }
 
 /// Trait designed to be implemented by every addons
@@ -20,26 +29,26 @@ pub trait MyToolsAddon {
     /// Function to get the help message of the addon
     fn get_help(&self) -> String {
         // Get addon's keyword
-        let keyword = self.get_keyword();
+        let keyword: &str = self.get_keyword();
 
         // Get the list of commands
-        let commands = self.get_list_commands();
-
-        // Generate the width of the space separator based on maximum command input length and keyword length
-        let width_separator =
-            "my_tools".len() // Tool name length
-            + keyword.len() // Addon's keyword length
-            + commands.iter().map(|cmd| cmd.get_command_input().len()).max().unwrap_or(0) // Max
-        // command input length
-            + 9;
+        let command_list: Vec<CommandInputsHelp> = self.get_list_commands();
 
         // Get the commands input and help message
-        let commands: Vec<String> = commands.iter().map(|cmd| {
+        let commands_text_message: Vec<String> = command_list.iter().map(|cmd| {
+            // Generate list of command inputs
+            let command_inputs = cmd.inputs_msg
+                .iter()
+                .map(|input| {
+                    format!("\t\tmy_tools {} {}", keyword, input)
+                })
+                .collect::<Vec<String>>();
+
+            // Generate the whole command message
             format!(
-                "{: <width_separator$}{}",
-                format!("'my_tools {} {}'", keyword, cmd.get_command_input()),
-                cmd.get_command_help(),
-                width_separator = width_separator,
+                "\t{}\n{}",
+                cmd.help_msg,
+                command_inputs.join("\n")
             )
         }).collect::<Vec<String>>();
 
@@ -50,10 +59,10 @@ pub trait MyToolsAddon {
 Usage: {keyword} <COMMAND>
 
 Commands:
-  {commands}
+{commands}
 "#,
-                keyword = keyword,
-                commands = commands.join("\n  ")
+            keyword = keyword,
+            commands = commands_text_message.join("\n")
         )
     }
 
@@ -71,11 +80,10 @@ Commands:
     fn get_keyword(&self) -> &'static str;
 
     /// Function to list every commands available
-    fn get_list_commands(&self) -> Vec<Box<dyn MyToolsAddonCommand>>;
+    fn get_list_commands(&self) -> Vec<CommandInputsHelp>;
 
     /// Function to parse the arguments and return a MyToolsAddonCommand
     fn parse(&self, args: &[String]) -> Result<Box<dyn MyToolsAddonCommand>, MyToolsError>;
-
 }
 
 /// Error type for the addon
