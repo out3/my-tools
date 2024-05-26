@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use my_tools::MyToolsError;
 use my_tools::MyToolsAddon;
-use my_tools::CommandStringResult;
+use my_tools::CommandResult;
 
 // Import the addon modules
 mod addons {
@@ -22,7 +22,7 @@ fn get_enabled_addons() ->  Vec<Box<dyn MyToolsAddon>> {
 }
 
 /// Function to call the right addon depending on first argument
-fn call_addon(args: Vec<String>, addons: &Vec<Box<dyn MyToolsAddon>>) -> Result<CommandStringResult, MyToolsError> {
+fn call_addon(args: Vec<String>, addons: &Vec<Box<dyn MyToolsAddon>>) -> Result<CommandResult, MyToolsError> {
     // Get the addon to run
     let addon_to_run = &args[1];
 

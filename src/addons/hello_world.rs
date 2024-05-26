@@ -1,21 +1,20 @@
-use my_tools::MyToolsAddon;
-use my_tools::MyToolsAddonCommand;
-use my_tools::MyToolsError;
-use my_tools::CommandStringResult;
+use my_tools::*;
 
 /// Command to print "Hello, world!"
 struct HelloWorldCommand {}
 
 impl MyToolsAddonCommand for HelloWorldCommand {
-    fn execute(&self) -> Result<CommandStringResult, MyToolsError> {
+    fn execute(&self) -> Result<CommandResult, MyToolsError> {
         Ok("Hello, world!".to_string())
     }
 
-    fn get_command_input(&self) -> String {
-        "".to_string()
+    fn get_command_input() -> CommandInputs {
+        vec![
+            "".to_string()
+        ]
     }
 
-    fn get_command_help(&self) -> String {
+    fn get_command_help() -> CommandHelp {
         "Print \"Hello, world!\"".to_string()
     }
 }
@@ -26,15 +25,17 @@ struct HelloInputCommand {
 }
 
 impl MyToolsAddonCommand for HelloInputCommand {
-    fn execute(&self) -> Result<CommandStringResult, MyToolsError> {
+    fn execute(&self) -> Result<CommandResult, MyToolsError> {
         Ok(format!("Hello, {}!", self.name))
     }
 
-    fn get_command_input(&self) -> String {
-        "<name>".to_string()
+    fn get_command_input() -> CommandInputs {
+        vec![
+            "<name>".to_string()
+        ]
     }
 
-    fn get_command_help(&self) -> String {
+    fn get_command_help() -> CommandHelp {
         "Print \"Hello, <name>!\"".to_string()
     }
 }
@@ -69,10 +70,16 @@ impl MyToolsAddon for HelloWorldAddon {
     }
 
     /// Get the list of commands
-    fn get_list_commands(&self) -> Vec<Box<dyn MyToolsAddonCommand>> {
+    fn get_list_commands(&self) -> Vec<CommandInputsHelp> {
         vec![
-            Box::new(HelloWorldCommand {}),
-            Box::new(HelloInputCommand {name: String::new()})
+            CommandInputsHelp {
+                inputs_msg: HelloWorldCommand::get_command_input(),
+                help_msg: HelloWorldCommand::get_command_help()
+            },
+            CommandInputsHelp {
+                inputs_msg: HelloInputCommand::get_command_input(),
+                help_msg: HelloInputCommand::get_command_help()
+            },
         ]
     }
 }
