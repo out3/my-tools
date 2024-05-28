@@ -8,16 +8,19 @@ use my_tools::CommandResult;
 mod addons {
     // Step 1 : Define the addon module
     pub mod hello_world;
+    pub mod ip_network;
 }
 
 // Step 2 : Import the addon
 use addons::hello_world::HelloWorldAddon;
+use addons::ip_network::IpNetworkAddon;
 
 /// Function to get the list of enabled addons
 fn get_enabled_addons() ->  Vec<Box<dyn MyToolsAddon>> {
     // Step 3 : Add the addon to the list of enabled addons
     vec! [
-        Box::new(HelloWorldAddon)
+        Box::new(HelloWorldAddon),
+        Box::new(IpNetworkAddon),
     ]
 }
 

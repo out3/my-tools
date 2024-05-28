@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 enum-iterator = "2.0.0"
+ipnetwork = "0.20.0"

@@ -87,12 +87,14 @@ Commands:
 }
 
 /// Error type for the addon
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MyToolsError {
     /// Error when the addon is not recognized
     AddonNotFound(String),
     /// Error when the command is not well formatted
     InvalidCommand(String),
+    /// Error while parsing command
+    ParseCommandError(String),
     /// Error while executing command
     ExecutionCommandError(String)
 }
@@ -102,6 +104,7 @@ impl fmt::Display for MyToolsError {
         let description = match self {
             MyToolsError::AddonNotFound(s) => format!("Unknown addon: {}", s),
             MyToolsError::InvalidCommand(s) => format!("Invalid command: {}", s),
+            MyToolsError::ParseCommandError(s) => format!("Error while parsing command: {}", s),
             MyToolsError::ExecutionCommandError(s) => format!("Error while execution command: {}", s),
         };
         f.write_str(&description)
