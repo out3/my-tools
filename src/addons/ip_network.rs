@@ -14,10 +14,10 @@ impl MyToolsAddonCommand for GetIpAddressCommand {
 
     fn get_command_input() -> CommandInputs {
         vec![
-            "get address <ip/cidr>".to_string(),
-            "get address <ip/mask>".to_string(),
-            "get address <ip> <cidr>".to_string(),
-            "get address <ip> <mask>".to_string(),
+            "get addr <ip/cidr>".to_string(),
+            "get addr <ip/mask>".to_string(),
+            "get addr <ip> <cidr>".to_string(),
+            "get addr <ip> <mask>".to_string(),
         ]
     }
 
@@ -46,9 +46,16 @@ impl MyToolsAddon for IpNetworkAddon {
 
         // Parse the arguments and return the corresponding command
         match args[..] {
-            //["get", "address", arg2] => Ok(Box::new(),
-            //["get", "address", arg1, arg2] => Ok(Box::new(HelloWorldCommand {})),
-            //[name] => Ok(Box::new(HelloInputCommand { name: name.to_string() })),
+            ["get", "addr", arg1] => {
+                let ip_object = arg_to_ipv4network(arg1, None)?;
+                Ok(Box::new(GetIpAddressCommand { ip_object }))
+
+            },
+            ["get", "addr", arg1, arg2] => {
+                let ip_object = arg_to_ipv4network(arg1, Some(arg2))?;
+                Ok(Box::new(GetIpAddressCommand { ip_object }))
+
+            },
             _ => Err(MyToolsError::InvalidCommand(format!("Invalid command: {}\n", args.join(" "))))
         }
     }
