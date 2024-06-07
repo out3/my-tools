@@ -14,19 +14,66 @@ impl MyToolsAddonCommand for GetIpAddressCommand {
 
     fn get_command_input() -> CommandInputs {
         vec![
-            "get addr <ip/cidr>".to_string(),
-            "get addr <ip/mask>".to_string(),
-            "get addr <ip> <cidr>".to_string(),
-            "get addr <ip> <mask>".to_string(),
+            "get address <ip/cidr>".to_string(),
+            "get address <ip/mask>".to_string(),
+            "get address <ip> <cidr>".to_string(),
+            "get address <ip> <mask>".to_string(),
         ]
     }
 
     fn get_command_help() -> CommandHelp {
-        "Get the IP address for a given IP given object".to_string()
+        "Get the IP address for a given IP object".to_string()
     }
 }
 
+// Command to get the netmask address
+struct GetIpNetmaskCommand {
+    ip_object: Ipv4Network,
+}
 
+impl MyToolsAddonCommand for GetIpNetmaskCommand {
+    fn execute(&self) -> Result<CommandResult, MyToolsError> {
+        Ok(format!("{}", self.ip_object.mask()))
+    }
+
+    fn get_command_input() -> CommandInputs {
+        vec![
+            "get netmask <ip/cidr>".to_string(),
+            "get netmask <ip/mask>".to_string(),
+            "get netmask <ip> <cidr>".to_string(),
+            "get netmask <ip> <mask>".to_string(),
+        ]
+    }
+
+    fn get_command_help() -> CommandHelp {
+        "Get the IP netmask for a given IP object".to_string()
+    }
+}
+
+// Command to get the network address
+struct GetIpNetworkCommand {
+    ip_object: Ipv4Network,
+}
+
+impl MyToolsAddonCommand for GetIpNetworkCommand {
+    fn execute(&self) -> Result<CommandResult, MyToolsError> {
+        Ok(format!("{}", self.ip_object.network()))
+    }
+
+    fn get_command_input() -> CommandInputs {
+        vec![
+            "get network <ip/cidr>".to_string(),
+            "get network <ip/mask>".to_string(),
+            "get network <ip> <cidr>".to_string(),
+            "get network <ip> <mask>".to_string(),
+        ]
+    }
+
+    fn get_command_help() -> CommandHelp {
+        "Get the IP network address for a given IP object".to_string()
+    }
+}
+// Addon structure
 pub struct IpNetworkAddon;
 
 impl MyToolsAddon for IpNetworkAddon {
@@ -46,14 +93,32 @@ impl MyToolsAddon for IpNetworkAddon {
 
         // Parse the arguments and return the corresponding command
         match args[..] {
-            ["get", "addr", arg1] => {
+            // GetIpAddress
+            ["get", "address", arg1] => {
                 let ip_object = arg_to_ipv4network(arg1, None)?;
                 Ok(Box::new(GetIpAddressCommand { ip_object }))
-
             },
-            ["get", "addr", arg1, arg2] => {
+            ["get", "address", arg1, arg2] => {
                 let ip_object = arg_to_ipv4network(arg1, Some(arg2))?;
                 Ok(Box::new(GetIpAddressCommand { ip_object }))
+            },
+            // GetIpNetmask
+            ["get", "netmask", arg1] => {
+                let ip_object = arg_to_ipv4network(arg1, None)?;
+                Ok(Box::new(GetIpNetmaskCommand { ip_object }))
+            },
+            ["get", "netmask", arg1, arg2] => {
+                let ip_object = arg_to_ipv4network(arg1, Some(arg2))?;
+                Ok(Box::new(GetIpNetmaskCommand { ip_object }))
+            },
+            // GetIpNetwork
+            ["get", "network", arg1] => {
+                let ip_object = arg_to_ipv4network(arg1, None)?;
+                Ok(Box::new(GetIpNetworkCommand { ip_object }))
+            },
+            ["get", "network", arg1, arg2] => {
+                let ip_object = arg_to_ipv4network(arg1, Some(arg2))?;
+                Ok(Box::new(GetIpNetworkCommand { ip_object }))
 
             },
             _ => Err(MyToolsError::InvalidCommand(format!("Invalid command: {}\n", args.join(" "))))
@@ -66,6 +131,14 @@ impl MyToolsAddon for IpNetworkAddon {
             CommandInputsHelp {
                 inputs_msg: GetIpAddressCommand::get_command_input(),
                 help_msg: GetIpAddressCommand::get_command_help()
+            },
+            CommandInputsHelp {
+                inputs_msg: GetIpNetmaskCommand::get_command_input(),
+                help_msg: GetIpNetmaskCommand::get_command_help()
+            },
+            CommandInputsHelp {
+                inputs_msg: GetIpNetworkCommand::get_command_input(),
+                help_msg: GetIpNetworkCommand::get_command_help()
             },
         ]
     }

@@ -46,7 +46,7 @@ pub trait MyToolsAddon {
 
             // Generate the whole command message
             format!(
-                "\t{}\n{}",
+                "\t{}\n{}\n",
                 cmd.help_msg,
                 command_inputs.join("\n")
             )
