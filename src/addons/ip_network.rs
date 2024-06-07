@@ -110,7 +110,9 @@ fn arg_to_ipv4network(arg1: &str, arg2: Option<&str>) -> Result<Ipv4Network, MyT
             } else {
                 // Try to parse arg2 as a netmask
                 if let Ok(netmask) = arg2.parse::<Ipv4Addr>() {
-                    return Ok(Ipv4Network::with_netmask(ip, netmask).unwrap())
+                    if is_netmask(&netmask) {
+                        return Ok(Ipv4Network::with_netmask(ip, netmask).unwrap())
+                    }
                 }
             }
 
@@ -119,6 +121,22 @@ fn arg_to_ipv4network(arg1: &str, arg2: Option<&str>) -> Result<Ipv4Network, MyT
         } else {
             Err(MyToolsError::ParseCommandError(format!("Invalid IP address: '{}'", arg1)))
         }
+    }
+
+    fn is_netmask(addr: &Ipv4Addr) -> bool {
+        let addr_bit = addr.octets()
+            .iter()
+            .fold(0u32, |acc, &octet| acc << 8 | octet as u32);
+
+        let mut found_zero = false;
+        for i in 0..32 {
+            if addr_bit & (1 << (31 - i)) == 0 {
+                found_zero = true;
+            } else if found_zero {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -226,8 +244,15 @@ fn arg_to_ipv4network_test_2_args_ip_ok_netmask_ok() {
 }
 
 #[test]
-fn arg_to_ipv4network_test_2_args_ip_ok_netmask_nok() {
+fn arg_to_ipv4network_test_2_args_ip_ok_netmask_nok_1() {
     let arg2 = "255.255.255.256";
+    let arg_object = arg_to_ipv4network("127.0.0.1", Some(arg2));
+    assert_eq!(arg_object.unwrap_err(), MyToolsError::ParseCommandError(format!("Argument '{}' is neither a valid CIDR nor a netmask", arg2)))
+}
+
+#[test]
+fn arg_to_ipv4network_test_2_args_ip_ok_netmask_nok_2() {
+    let arg2 = "255.255.0.128";
     let arg_object = arg_to_ipv4network("127.0.0.1", Some(arg2));
     assert_eq!(arg_object.unwrap_err(), MyToolsError::ParseCommandError(format!("Argument '{}' is neither a valid CIDR nor a netmask", arg2)))
 }
